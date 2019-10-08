@@ -1,48 +1,51 @@
-$data = Get-Content ((Split-Path $script:MyInvocation.MyCommand.Path)+ "\" + "input.txt")
-$output = ""
-$shiftCount = 26
-$output += "=================ORIGIN================="
-$output += "`n"
-$output += "`n"
-for($i  = 0; $i -le $shiftCount; $i++)
+function DeCipher
 {
-    foreach($line in $data)
+    param ([int]$shiftCount)
+    $data = Get-Content ($PSScriptRoot + "\" + "input.txt")
+    $output = ""
+    $output += "=================ORIGIN================="
+    $output += "`n"
+    $output += "`n"
+    for($i  = 0; $i -le $shiftCount; $i++)
     {
-        foreach($letter in $line.ToCharArray())
+        foreach($line in $data)
         {
-            if($letter -match "[a-zA-Z]")
+            foreach($letter in $line.ToCharArray())
             {
-                if(([int]$letter -ge 65 -and [int]$letter -le 90 -and ([int]$letter + $i) -ge 91 ) -or ([int]$letter -ge 97 -and [int]$letter -le 122 -and ([int]$letter + $i) -ge -123))
+                if($letter -match "[a-zA-Z]")
                 {
-                    if($letter -match "[a-z]")
+                    if(([int]$letter -ge 65 -and [int]$letter -le 90 -and ([int]$letter + $i) -ge 91 ) -or ([int]$letter -ge 97 -and [int]$letter -le 122 -and ([int]$letter + $i) -ge -123))
                     {
-                        $overFlow = ($i + [int]$letter - 122)
-                        $output += [char](97 + $overFlow -1)
+                        if($letter -match "[a-z]")
+                        {
+                            $overFlow = ($i + [int]$letter - 122)
+                            $output += [char](97 + $overFlow -1)
+                        }
+                        else
+                        {
+                            $overFlow = ($i + [int]$letter - 90)
+                            $output += [char](65 + $overFlow -1)
+                        }
                     }
                     else
                     {
-                        $overFlow = ($i + [int]$letter - 90)
-                        $output += [char](65 + $overFlow -1)
+                        $output += [char]($i + [int]$letter)
                     }
                 }
                 else
                 {
-                    $output += [char]($i + [int]$letter)
+                    $output += $letter
                 }
             }
-            else
-            {
-                $output += $letter
-            }
+            $output += "`n"
         }
-        $output += "`n"
+        if($i -lt $shiftCount)
+        {
+            $output += "`n"
+            $output += "=================SHIFT "  + ($i + 1) + "================="
+            $output += "`n"
+            $output += "`n"
+        }
     }
-    if($i -lt $shiftCount)
-    {
-        $output += "`n"
-        $output += "=================SHIFT "  + ($i + 1) + "================="
-        $output += "`n"
-        $output += "`n"
-    }
+    Set-Content -Path ($PSScriptRoot + "\" + "output.txt") -Value $output   
 }
-Set-Content -Path ((Split-Path $script:MyInvocation.MyCommand.Path)+ "\" + "output.txt") -Value $output
